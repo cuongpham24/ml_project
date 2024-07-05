@@ -1,7 +1,7 @@
 *.parquet
 *~$*
 *.jsonl
-
+*.npy
 # General
 .DS_Store
 .AppleDouble
