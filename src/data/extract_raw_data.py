@@ -3,7 +3,7 @@ This function take the original files and extract the first 1000000 rows for eac
 """
 
 import pandas as pd
-from gobal_variables import *
+from src.data.constants import *
 
 max_size = 1000000
 sample_size = 100000
