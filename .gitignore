@@ -2,6 +2,7 @@
 *~$*
 *.jsonl
 *.npy
+*.npz
 # General
 .DS_Store
 .AppleDouble
