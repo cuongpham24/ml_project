@@ -1,5 +1,5 @@
 """
-This function take the original files and extract the first 1000000 rows for each category
+This function extract the first 1000000 rows for each category from the original file
 """
 
 import pandas as pd
