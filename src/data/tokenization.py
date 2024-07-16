@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 from transformers import DistilBertTokenizerFast, DistilBertModel
 from src.data.constants import *
+import torch
 
 def get_raw_data(label, column):
     # Validate inputs
@@ -44,31 +45,33 @@ def set_device():
         print("PyTorch is using CPU.")
     return device
 
+# Load the tokenizer and model
+tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
+model = DistilBertModel.from_pretrained('distilbert-base-uncased')
+device = set_device()
+
+# Send data to GPU
+model.to(device)
+
 if __name__ == "main":
     # Get parameters
     label = sys.argv[1]    # The first argument
     column = sys.argv[2]   # The second argument
     documents = get_raw_data(label, column)
-    device = set_device()
     
-    # Load the tokenizer and model
-    tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
-    model = DistilBertModel.from_pretrained('distilbert-base-uncased')
-
-    # Send data to GPU
-    model.to(device)
-
     # Tokenize and vectorize data
+    batch_size = 200
+    
     num_batch = ceil(len(documents) / batch_size)
     for i in range(num_batch):
         if i % 4 == 0:
             print(f"Batch {i+1}") 
         if i == 0:
-            xtrain = word_to_vec(documents[i * batch_size:(i + 1) * batch_size])
+            x_vectorized = word_to_vec(documents[i * batch_size:(i + 1) * batch_size])
         elif i == num_batch - 1:
-            xtrain = np.vstack([xtrain, word_to_vec(documents[i * batch_size:len(documents)])])
+            x_vectorized = np.vstack([x_vectorized, word_to_vec(documents[i * batch_size:len(documents)])])
         else:
-            xtrain = np.vstack([xtrain, word_to_vec(documents[i * batch_size:(i + 1) * batch_size])])
+            x_vectorized = np.vstack([x_vectorized, word_to_vec(documents[i * batch_size:(i + 1) * batch_size])])
 
     # save numpy array as npz file
-    np.savez_compressed(f"../../data/processed/{label}_bert_{column}.npz", all_embeddings_np)
+    np.savez_compressed(f"../../data/processed/{label}_bert_{column}.npz", x_vectorized)
