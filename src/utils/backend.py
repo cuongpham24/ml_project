@@ -21,10 +21,8 @@ def set_device():
         print("PyTorch is using CPU.")
     return device
 
-# Setup backend device
-device = set_device()
 
-def model_train_and_eval(model, train_loader, test_loader, learning_rate=0.001, num_epochs=40, device=device):
+def model_train_and_eval(model, train_loader, test_loader, learning_rate=0.001, num_epochs=40, device="cpu"):
     
     # Initialize the model, loss function, and optimizer
     model = model.to(device)

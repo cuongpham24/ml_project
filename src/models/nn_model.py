@@ -9,9 +9,6 @@ import torch.nn.functional as F
 import numpy as np
 from src.utils.backend import set_device, model_train_and_eval, batch_data_loader, load_emb_data
 
-# Setup backend device
-device = set_device()
-
 # Define the model
 class ClassificationModel(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
@@ -29,6 +26,7 @@ class ClassificationModel(nn.Module):
         lstm_out = lstm_out[:, -1, :]
         out = self.dense2(lstm_out)
         return out
+
 
 class ClassificationModel_02(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes, num_lstm_layers):
@@ -59,22 +57,30 @@ class ClassificationModel_02(nn.Module):
         return out
     
 if __name__ == "__main__":
-    # Load data
-    bert_vec = load_emb_data("feature_reduce_vec")
-    index = load_emb_data("feature_reduce_index")
-    label = load_emb_data("feature_reduce_label")
+    # Setup backend device
+    device = set_device()
 
-    train_loader, test_loader = batch_data_loader(bert_vec, label)
+    # Load data
+    feature_vec = load_emb_data("combine_feature")
+    title_vec = load_emb_data("combine_title")
+
+    bert_vec = (feature_vec + title_vec) / 2
+
+    index = load_emb_data("combine_index")
+    label = load_emb_data("combine_label")
+
+    train_loader, test_loader = batch_data_loader(bert_vec, label, batch_size=64)
 
     # Hyperparameters
-    input_size = 768
-    hidden_size = 64
+    input_size = title_vec.shape[1]
+    hidden_size = 256
     num_classes = 3
-    num_epochs = 1
+    num_epochs = 100
     learning_rate = 0.0005
     num_lstm_layers = 4
 
     # Initialize model
     model = ClassificationModel_02(input_size, hidden_size, num_classes, num_lstm_layers)
     # Train and evaluate model
-    all_targets, all_predictions = model_train_and_eval(model, train_loader, test_loader, learning_rate=learning_rate, num_epochs=num_epochs)
+    all_targets, all_predictions = model_train_and_eval(model, train_loader, test_loader, learning_rate=learning_rate, 
+                                                        num_epochs=num_epochs, device=device)
