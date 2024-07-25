@@ -6,6 +6,7 @@ import numpy as np
 from transformers import DistilBertTokenizerFast, DistilBertModel
 from src.data.constants import *
 import torch
+from src.utils.backend import set_device
 
 def get_raw_data(label, column):
     # Validate inputs
@@ -29,21 +30,6 @@ def word_to_vec(texts_batch):
         outputs = model(**inputs)
         embeddings = outputs.last_hidden_state.mean(dim=1)  # Mean pooling
     return embeddings.cpu().numpy()
-
-# Setup backend device
-def set_device():
-    if torch.cuda.is_available():
-        # Check for CUDA (traditional GPUs)
-        device = torch.device("cuda")
-        print("PyTorch is using CUDA.")
-    elif torch.backends.mps.is_available():
-        # Check for MPS (Apple Silicon GPUs)
-        device = torch.device("mps")
-        print("PyTorch is using MPS.")
-    else:
-        device = torch.device("cpu")
-        print("PyTorch is using CPU.")
-    return device
 
 # Load the tokenizer and model
 tokenizer = DistilBertTokenizerFast.from_pretrained('distilbert-base-uncased')
